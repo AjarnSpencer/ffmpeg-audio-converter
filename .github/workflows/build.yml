@@ -1,0 +1,72 @@
+name: Build Application
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install PyInstaller
+      run: pip install pyinstaller
+
+    - name: Install ImageMagick (macOS only)
+      if: runner.os == 'macOS'
+      run: brew install imagemagick
+
+    - name: Create .icns file (macOS only)
+      if: runner.os == 'macOS'
+      run: magick "ffmpeg-Audio-Converter.png" -resize 256x256 -define icon:auto-resize=256,128,64,48,32,16 app_icon.icns
+
+    - name: Run PyInstaller on Windows
+      if: runner.os == 'Windows'
+      run: python -m PyInstaller --noconfirm --onefile --windowed --icon="app_icon.ico" --add-data="app_icon.ico;." main.py
+
+    - name: Run PyInstaller on macOS
+      if: runner.os == 'macOS'
+      run: python -m PyInstaller --noconfirm --onefile --windowed --icon="app_icon.icns" --add-data="app_icon.ico;." main.py
+
+    - name: Run PyInstaller on Linux
+      if: runner.os == 'Linux'
+      run: |
+        python -m PyInstaller --noconfirm --onefile --name="main_linux" main.py
+
+    - name: Package macOS App
+      if: runner.os == 'macOS'
+      run: zip -r ffmpeg-audio-converter-macOS.zip dist/main.app
+
+    - name: Upload Windows Artifact
+      if: runner.os == 'Windows'
+      uses: actions/upload-artifact@v4
+      with:
+        name: ffmpeg-audio-converter-Windows
+        path: dist/main.exe
+
+    - name: Upload macOS Artifact
+      if: runner.os == 'macOS'
+      uses: actions/upload-artifact@v4
+      with:
+        name: ffmpeg-audio-converter-macOS
+        path: ffmpeg-audio-converter-macOS.zip
+
+    - name: Upload Linux Artifact
+      if: runner.os == 'Linux'
+      uses: actions/upload-artifact@v4
+      with:
+        name: ffmpeg-audio-converter-Linux
+        path: dist/main_linux

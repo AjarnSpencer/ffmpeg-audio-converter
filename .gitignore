@@ -1,0 +1,17 @@
+# Python build artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# PyInstaller artifacts
+build/
+dist/
+*.spec
+
+# Inno Setup output
+installer_output/
+
+# IDE/Editor specific
+.vscode/
+.idea/
