@@ -40,13 +40,11 @@ jobs:
       if: runner.os == 'Windows'
       run: python -m PyInstaller --noconfirm --onefile --windowed --icon="app_icon.ico" --add-data="app_icon.ico;." main.py
 
-    - name: Install Inno Setup (Windows only)
-      if: runner.os == 'Windows'
-      uses: Minionguyjpro/Inno-Setup-Action@v1.2.7
-
     - name: Compile Installer with Inno Setup (Windows only)
       if: runner.os == 'Windows'
-      run: iscc setup.iss
+      uses: Minionguyjpro/Inno-Setup-Action@v1.2.7
+      with:
+        path: setup.iss
 
     - name: Run PyInstaller on macOS
       if: runner.os == 'macOS'
