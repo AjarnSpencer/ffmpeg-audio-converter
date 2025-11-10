@@ -39,7 +39,7 @@ jobs:
 
     - name: Run PyInstaller on macOS
       if: runner.os == 'macOS'
-      run: python -m PyInstaller --noconfirm --onefile --windowed --icon="app_icon.icns" --add-data="app_icon.ico;." main.py
+      run: python -m PyInstaller --noconfirm --windowed --icon="app_icon.icns" --add-data="app_icon.ico;." main.py
 
     - name: Run PyInstaller on Linux
       if: runner.os == 'Linux'
