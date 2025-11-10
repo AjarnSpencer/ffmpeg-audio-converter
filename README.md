@@ -60,3 +60,19 @@ You can download the latest version for your operating system from the **[Action
 ## System Requirement
 
 This application is a graphical frontend for `ffmpeg`. You **must** have `ffmpeg` installed on your system and accessible in your system's PATH for the application to work.
+
+---
+
+## Authorship & Credits
+
+This project was created and developed by **Ajarn Spencer Littlewood** in collaboration with the **Gemini CLI Unleashed AI**.
+
+- **Project Page:** [https://sites.google.com/view/gemini-cli/](https://sites.google.com/view/gemini-cli/)
+- **Author's Homepage:** [https://ajarnspencer.com](https://ajarnspencer.com)
+- **Author's GitHub:** [https://github.com/AjarnSpencer](https://github.com/AjarnSpencer)
+
+## License
+
+This project is licensed under the **Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0)**. You are free to share and adapt this material for any purpose, even commercially, as long as you give appropriate credit and distribute your contributions under the same license.
+
+See the [LICENSE](LICENSE) file for more details.
