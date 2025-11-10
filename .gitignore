@@ -15,3 +15,6 @@ installer_output/
 # IDE/Editor specific
 .vscode/
 .idea/
+
+# Local secrets - DO NOT COMMIT
+token.txt
