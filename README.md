@@ -20,41 +20,38 @@ This application was developed by the Gemini CLI Unleashed AI in collaboration w
 
 ## Installation & Usage
 
-You can download the latest version for your operating system from the **[Actions tab](https://github.com/AjarnSpencer/ffmpeg-audio-converter/actions)** on this repository.
-1. Click on the latest completed workflow under "Build Application".
-2. Scroll down to the "Artifacts" section to find and download the application for your OS.
+You can download the latest version for your operating system from the **[Releases page](https://github.com/AjarnSpencer/ffmpeg-audio-converter/releases)**.
+
+Click on "Assets" for the latest release and download the appropriate file for your operating system.
 
 ---
 
 ### Windows
 
-1.  Download the `ffmpeg-audio-converter-Windows` artifact.
-2.  You will get a single executable file: `main.exe`.
-3.  This is a portable application. You can place it anywhere and run it directly. No installation is needed.
+-   **Installer:** Download `ffmpeg-audio-converter-Windows-Installer.exe` and run it.
+-   **Portable:** Download `ffmpeg-audio-converter-Windows-Portable.exe` and run it directly.
 
 ---
 
 ### macOS
 
-1.  Download the `ffmpeg-audio-converter-macOS` artifact.
-2.  Unzip the `ffmpeg-audio-converter-macOS.zip` file.
-3.  You will get an application bundle named `main.app`.
-4.  Move `main.app` to your "Applications" folder and run it from there.
+1.  Download `ffmpeg-audio-converter-macOS.zip`.
+2.  Unzip the file.
+3.  Move the `main.app` bundle to your "Applications" folder and run it.
     *Note: You may need to right-click the app and select "Open" the first time you run it if you get a security warning.*
 
 ---
 
 ### Linux
 
-1.  Download the `ffmpeg-audio-converter-Linux` artifact.
-2.  You will get a single executable file named `main_linux`.
-3.  Open a terminal and make the file executable:
+1.  Download `ffmpeg-audio-converter-Linux`.
+2.  Open a terminal and make the file executable:
     ```bash
-    chmod +x main_linux
+    chmod +x ffmpeg-audio-converter-Linux
     ```
-4.  Run the application from the terminal:
+3.  Run the application from the terminal:
     ```bash
-    ./main_linux
+    ./ffmpeg-audio-converter-Linux
     ```
 
 ## System Requirement

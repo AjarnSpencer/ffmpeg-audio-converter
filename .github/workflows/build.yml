@@ -1,14 +1,15 @@
-name: Build Application
+name: Build and Release
 
 on:
   push:
     branches: [ "main" ]
+    tags:
+      - 'v*.*.*'
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ${{ matrix.os }}
-
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
@@ -22,11 +23,10 @@ jobs:
       with:
         python-version: '3.11'
 
-    - name: Install PyInstaller
-      run: pip install pyinstaller
-
-    - name: Install Pillow
-      run: pip install Pillow
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyinstaller Pillow
 
     - name: Install ImageMagick (macOS only)
       if: runner.os == 'macOS'
@@ -40,7 +40,7 @@ jobs:
       if: runner.os == 'Windows'
       run: python -m PyInstaller --noconfirm --onefile --windowed --icon="app_icon.ico" --add-data="app_icon.ico;." main.py
 
-    - name: Compile Installer with Inno Setup (Windows only)
+    - name: Install Inno Setup (Windows only)
       if: runner.os == 'Windows'
       uses: Minionguyjpro/Inno-Setup-Action@v1.2.7
       with:
@@ -52,37 +52,49 @@ jobs:
 
     - name: Run PyInstaller on Linux
       if: runner.os == 'Linux'
-      run: |
-        python -m PyInstaller --noconfirm --onefile --name="main_linux" main.py
+      run: python -m PyInstaller --noconfirm --onefile --name="ffmpeg-audio-converter-Linux" main.py
 
-    - name: Package macOS App
+    - name: Prepare Windows Artifacts
+      if: runner.os == 'Windows'
+      run: |
+        mv dist/main.exe dist/ffmpeg-audio-converter-Windows-Portable.exe
+        mv dist/ffmpeg_Audio_Converter_setup.exe dist/ffmpeg-audio-converter-Windows-Installer.exe
+    
+    - name: Prepare macOS Artifact
       if: runner.os == 'macOS'
       run: zip -r ffmpeg-audio-converter-macOS.zip dist/main.app
 
-    - name: Upload Windows Portable Artifact
-      if: runner.os == 'Windows'
+    - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: ffmpeg-audio-converter-Windows-Portable
-        path: dist/main.exe
+        name: build-artifacts-${{ matrix.os }}
+        path: |
+          dist/ffmpeg-audio-converter-Windows-Portable.exe
+          dist/ffmpeg-audio-converter-Windows-Installer.exe
+          ffmpeg-audio-converter-macOS.zip
+          dist/ffmpeg-audio-converter-Linux
+        if-no-files-found: ignore
 
-    - name: Upload Windows Installer Artifact
-      if: runner.os == 'Windows'
-      uses: actions/upload-artifact@v4
-      with:
-        name: ffmpeg-audio-converter-Windows-Installer
-        path: dist/ffmpeg_Audio_Converter_setup.exe
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+      
+      - name: List downloaded files
+        run: ls -R artifacts/
 
-    - name: Upload macOS Artifact
-      if: runner.os == 'macOS'
-      uses: actions/upload-artifact@v4
-      with:
-        name: ffmpeg-audio-converter-macOS
-        path: ffmpeg-audio-converter-macOS.zip
-
-    - name: Upload Linux Artifact
-      if: runner.os == 'Linux'
-      uses: actions/upload-artifact@v4
-      with:
-        name: ffmpeg-audio-converter-Linux
-        path: dist/main_linux
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/build-artifacts-windows-latest/ffmpeg-audio-converter-Windows-Portable.exe
+            artifacts/build-artifacts-windows-latest/ffmpeg-audio-converter-Windows-Installer.exe
+            artifacts/build-artifacts-macos-latest/ffmpeg-audio-converter-macOS.zip
+            artifacts/build-artifacts-ubuntu-latest/ffmpeg-audio-converter-Linux
+          body: "Automated release for ${{ github.ref_name }}"
+          draft: true
