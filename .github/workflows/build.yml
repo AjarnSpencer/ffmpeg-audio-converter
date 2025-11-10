@@ -42,7 +42,7 @@ jobs:
 
     - name: Install Inno Setup (Windows only)
       if: runner.os == 'Windows'
-      uses: Minionguyjpro/Inno-Setup-Action@v1
+      uses: Minionguyjpro/Inno-Setup-Action@v1.2.7
 
     - name: Compile Installer with Inno Setup (Windows only)
       if: runner.os == 'Windows'
