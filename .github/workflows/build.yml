@@ -25,6 +25,9 @@ jobs:
     - name: Install PyInstaller
       run: pip install pyinstaller
 
+    - name: Install Pillow
+      run: pip install Pillow
+
     - name: Install ImageMagick (macOS only)
       if: runner.os == 'macOS'
       run: brew install imagemagick
