@@ -79,6 +79,8 @@ jobs:
     needs: build
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # Grant write permission to GITHUB_TOKEN
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -98,3 +100,4 @@ jobs:
             artifacts/build-artifacts-ubuntu-latest/ffmpeg-audio-converter-Linux
           body: "Automated release for ${{ github.ref_name }}"
           draft: true
+          token: ${{ secrets.GITHUB_TOKEN }} # Explicitly pass the token
