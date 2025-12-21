@@ -1,20 +1,22 @@
-# Python build artifacts
+# Byte-compiled / optimized / DLL files
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*$py.class
 
-# PyInstaller artifacts
+# PyInstaller
+#  Usually these files are written by a reasonable user like myself
+#  in MANIFEST.in to keep the source tree clean.
+*.spec
 build/
 dist/
-*.spec
-
-# Inno Setup output
 installer_output/
 
-# IDE/Editor specific
-.vscode/
-.idea/
+# Backup files
+*.bak
 
-# Local secrets - DO NOT COMMIT
+# IDE files
+.idea/
+.vscode/
+
+# Secrets
 token.txt

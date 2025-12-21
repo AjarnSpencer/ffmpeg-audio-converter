@@ -1,103 +1,79 @@
-name: Build and Release
+name: Build Application
 
 on:
   push:
-    branches: [ "main" ]
     tags:
       - 'v*.*.*'
-  workflow_dispatch:
 
 jobs:
   build:
+    name: Build for ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+    - name: Check out code
+      uses: actions/checkout@v3
 
     - name: Set up Python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v4
       with:
-        python-version: '3.11'
+        python-version: '3.9'
 
-    - name: Install Dependencies
+    - name
+      : Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pyinstaller Pillow
+        pip install pyinstaller
 
-    - name: Install ImageMagick (macOS only)
-      if: runner.os == 'macOS'
-      run: brew install imagemagick
+    - name: Install Pillow for macOS icon support
+      if: matrix.os == 'macos-latest'
+      run: pip install Pillow
 
-    - name: Create .icns file (macOS only)
-      if: runner.os == 'macOS'
-      run: magick "ffmpeg-Audio-Converter.png" -resize 256x256 -define icon:auto-resize=256,128,64,48,32,16 app_icon.icns
-
-    - name: Run PyInstaller on Windows
-      if: runner.os == 'Windows'
-      run: python -m PyInstaller --noconfirm --onefile --windowed --icon="app_icon.ico" --add-data="app_icon.ico;." main.py
-
-    - name: Install Inno Setup (Windows only)
-      if: runner.os == 'Windows'
-      uses: Minionguyjpro/Inno-Setup-Action@v1.2.7
-      with:
-        path: setup.iss
-
-    - name: Run PyInstaller on macOS
-      if: runner.os == 'macOS'
-      run: python -m PyInstaller --noconfirm --windowed --icon="app_icon.icns" --add-data="app_icon.ico:." main.py
-
-    - name: Run PyInstaller on Linux
-      if: runner.os == 'Linux'
-      run: python -m PyInstaller --noconfirm --onefile --name="ffmpeg-audio-converter-Linux" main.py
-
-    - name: Prepare Windows Artifacts
-      if: runner.os == 'Windows'
+    - name: Build with PyInstaller (Windows)
+      if: matrix.os == 'windows-latest'
       run: |
-        mv dist/main.exe dist/ffmpeg-audio-converter-Windows-Portable.exe
-        mv dist/ffmpeg_Audio_Converter_setup.exe dist/ffmpeg-audio-converter-Windows-Installer.exe
-    
-    - name: Prepare macOS Artifact
-      if: runner.os == 'macOS'
-      run: zip -r ffmpeg-audio-converter-macOS.zip dist/main.app
+        pip install pyinstaller-windows
+        pyinstaller --noconfirm --onefile --windowed --icon "app_icon.ico" --add-data "app_icon.ico;." --name "ffmpeg-audio-converter-Windows-Portable" main.py
 
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v4
+    - name: Build with PyInstaller (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libx11-dev libxext-dev libxrender-dev libice-dev libsm-dev libxkbfile-dev
+        pyinstaller --noconfirm --onefile --windowed --icon "app_icon.ico" --add-data "app_icon.ico:." --name "ffmpeg-audio-converter-Linux" main.py
+
+    - name: Build with PyInstaller (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        pyinstaller --noconfirm --onefile --windowed --icon "app_icon.ico" --add-data "app_icon.ico:." --name "ffmpeg-audio-converter-macOS" main.py
+        
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
       with:
-        name: build-artifacts-${{ matrix.os }}
-        path: |
-          dist/ffmpeg-audio-converter-Windows-Portable.exe
-          dist/ffmpeg-audio-converter-Windows-Installer.exe
-          ffmpeg-audio-converter-macOS.zip
-          dist/ffmpeg-audio-converter-Linux
-        if-no-files-found: ignore
+        name: ffmpeg-audio-converter-${{ matrix.os }}
+        path: dist/
 
   release:
+    name: Create Release
     needs: build
-    if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Grant write permission to GITHUB_TOKEN
+      contents: write
     steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts/
-      
-      - name: List downloaded files
-        run: ls -R artifacts/
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+      with:
+        path: artifacts
 
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            artifacts/build-artifacts-windows-latest/ffmpeg-audio-converter-Windows-Portable.exe
-            artifacts/build-artifacts-windows-latest/ffmpeg-audio-converter-Windows-Installer.exe
-            artifacts/build-artifacts-macos-latest/ffmpeg-audio-converter-macOS.zip
-            artifacts/build-artifacts-ubuntu-latest/ffmpeg-audio-converter-Linux
-          body: "Automated release for ${{ github.ref_name }}"
-          draft: true
-          token: ${{ secrets.GITHUB_TOKEN }} # Explicitly pass the token
+    - name: Create Release and Upload Assets
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          artifacts/ffmpeg-audio-converter-windows-latest/*
+          artifacts/ffmpeg-audio-converter-ubuntu-latest/*
+          artifacts/ffmpeg-audio-converter-macos-latest/*
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
